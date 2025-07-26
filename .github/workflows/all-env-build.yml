@@ -1,0 +1,36 @@
+name: Run Processing Time for All Envs
+
+on:
+  workflow_dispatch:
+
+jobs:
+  run-multi-env-script:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install requests
+
+      - name: Run multi-env script
+        env:
+          DEV_SAP_USERNAME: ${{ secrets.DEV_SAP_USERNAME }}
+          DEV_SAP_PASSWORD: ${{ secrets.DEV_SAP_PASSWORD }}
+          DEV_SAP_BASE_URL: ${{ secrets.DEV_SAP_BASE_URL }}
+          UAT_SAP_USERNAME: ${{ secrets.UAT_SAP_USERNAME }}
+          UAT_SAP_PASSWORD: ${{ secrets.UAT_SAP_PASSWORD }}
+          UAT_SAP_BASE_URL: ${{ secrets.UAT_SAP_BASE_URL }}
+          PROD_SAP_USERNAME: ${{ secrets.PROD_SAP_USERNAME }}
+          PROD_SAP_PASSWORD: ${{ secrets.PROD_SAP_PASSWORD }}
+          PROD_SAP_BASE_URL: ${{ secrets.PROD_SAP_BASE_URL }}
+          IFLOW_URL: ${{ secrets.IFLOW_URL }}
+          IFLOW_USERNAME: ${{ secrets.IFLOW_USERNAME }}
+          IFLOW_PASSWORD: ${{ secrets.IFLOW_PASSWORD }}
+        run: python .github/workflows/fetch_all_env_processing_times_exceptretry.py
