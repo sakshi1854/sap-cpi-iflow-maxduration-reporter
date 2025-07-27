@@ -7,7 +7,7 @@ import os
 import re
 
 # ------------------------
-# Load environment configs from GitHub secrets
+# Load environment configs from environment variables (secrets)
 # ------------------------
 environments = {
     "DEV": {
@@ -27,21 +27,23 @@ environments = {
     }
 }
 
-# Unified iFlow credentials and URL (from secrets)
+# Unified CPI iFlow credentials and URL (from secrets)
 IFLOW_URL = os.getenv("IFLOW_URL")
 IFLOW_USERNAME = os.getenv("IFLOW_USERNAME")
 IFLOW_PASSWORD = os.getenv("IFLOW_PASSWORD")
 
-# Validate all secrets are present
-required_envs = [IFLOW_URL, IFLOW_USERNAME, IFLOW_PASSWORD]
-for env_data in environments.values():
-    required_envs.extend(env_data.values())
+# ------------------------
+# Validate environment variables
+# ------------------------
+required_secrets = [IFLOW_URL, IFLOW_USERNAME, IFLOW_PASSWORD]
+for env_config in environments.values():
+    required_secrets.extend(env_config.values())
 
-if not all(required_envs):
+if not all(required_secrets):
     raise RuntimeError(" One or more required environment variables are missing.")
 
 # ------------------------
-# Time range: past 24 hours UTC
+# Time range: past 24 hours in UTC
 # ------------------------
 end_time = datetime.utcnow()
 start_time = end_time - timedelta(days=1)
@@ -58,19 +60,13 @@ final_payload = {
 }
 
 # ------------------------
-# Helper to parse SAP date format
-# ------------------------
-def parse_log_date(date_str):
-    match = re.search(r'/Date\((\d+)\)/', date_str)
-    return int(match.group(1)) if match else None
-
-# ------------------------
-# Processing for each environment
+# Execution per Environment
 # ------------------------
 for env, config in environments.items():
-    print(f"\n\n🔹 Running for Environment: {env}\n{'-' * 40}")
+    print(f"\n\n Running for Environment: {env}\n{'-' * 40}")
 
-    filter_str = f"LogStart ge datetime'{start_str}' and LogEnd le datetime'{end_str}'"
+    # Aligning filter with correct logic (LogEnd >= start AND LogStart <= end)
+    filter_str = f"LogEnd ge datetime'{start_str}' and LogStart le datetime'{end_str}'"
     encoded_filter = quote(filter_str)
     initial_url = (
         f"{config['SAP_BASE_URL']}/MessageProcessingLogs"
@@ -80,10 +76,9 @@ for env, config in environments.items():
     all_results = []
     next_url = initial_url
 
-    # Fetching records with pagination
     while next_url:
-        print(f" Requesting: {next_url}")
-        response = requests.get(next_url, auth=HTTPBasicAuth(config["SAP_USERNAME"], config["SAP_PASSWORD"]))
+        print(f"Requesting: {next_url}")
+        response = requests.get(next_url, auth=HTTPBasicAuth(config['SAP_USERNAME'], config['SAP_PASSWORD']))
 
         if response.status_code == 200:
             data = response.json()
@@ -100,11 +95,15 @@ for env, config in environments.items():
             print(response.text)
             break
 
-    print(f"Collected {len(all_results)} records for {env}")
+    print(f" Collected {len(all_results)} records for {env}")
 
     # ------------------------
     # Duration Calculation
     # ------------------------
+    def parse_log_date(date_str):
+        match = re.search(r'/Date\((\d+)\)/', date_str)
+        return int(match.group(1)) if match else None
+
     duration_records = []
     for entry in all_results:
         start_ms = parse_log_date(entry["LogStart"])
@@ -115,10 +114,10 @@ for env, config in environments.items():
         duration_records.append({
             "IntegrationFlowName": entry["IntegrationFlowName"],
             "MessageGuid": entry["MessageGuid"],
-            "Status": entry["Status"],
             "DurationMs": duration,
             "LogStart": start_ms,
-            "LogEnd": end_ms
+            "LogEnd": end_ms,
+            "Status": entry.get("Status")
         })
 
     # ------------------------
@@ -142,9 +141,7 @@ for env, config in environments.items():
     for idx, entry in enumerate(top_5, 1):
         print(f"#{idx}: {entry['IntegrationFlowName']} - {entry['DurationMs']} ms")
 
-    # ------------------------
-    # Add environment result to final payload
-    # ------------------------
+    # Add to final payload
     final_payload["environments"][env] = {
         "Top5IflowsByDuration": top_5,
         "TotalMessagesProcessed": len(all_results)
