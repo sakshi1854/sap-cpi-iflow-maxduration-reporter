@@ -10,16 +10,16 @@ import re
 # Load environment configs from environment variables (secrets)
 # ------------------------
 environments = {
-    "DEV": {
-        "SAP_USERNAME": os.getenv("DEV_SAP_USERNAME"),
-        "SAP_PASSWORD": os.getenv("DEV_SAP_PASSWORD"),
-        "SAP_BASE_URL": os.getenv("DEV_SAP_BASE_URL")
-    },
-    "UAT": {
-        "SAP_USERNAME": os.getenv("UAT_SAP_USERNAME"),
-        "SAP_PASSWORD": os.getenv("UAT_SAP_PASSWORD"),
-        "SAP_BASE_URL": os.getenv("UAT_SAP_BASE_URL")
-    },
+    # "DEV": {
+    #     "SAP_USERNAME": os.getenv("DEV_SAP_USERNAME"),
+    #     "SAP_PASSWORD": os.getenv("DEV_SAP_PASSWORD"),
+    #     "SAP_BASE_URL": os.getenv("DEV_SAP_BASE_URL")
+    # },
+    # "UAT": {
+    #     "SAP_USERNAME": os.getenv("UAT_SAP_USERNAME"),
+    #     "SAP_PASSWORD": os.getenv("UAT_SAP_PASSWORD"),
+    #     "SAP_BASE_URL": os.getenv("UAT_SAP_BASE_URL")
+    # },
     "PROD": {
         "SAP_USERNAME": os.getenv("PROD_SAP_USERNAME"),
         "SAP_PASSWORD": os.getenv("PROD_SAP_PASSWORD"),
