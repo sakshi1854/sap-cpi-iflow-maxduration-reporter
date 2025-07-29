@@ -45,15 +45,15 @@ if not all(required_secrets):
 # ------------------------
 # Time range: past 24 hours in UTC
 # ------------------------
-# end_time = datetime.utcnow()
-# start_time = end_time - timedelta(days=1)
+end_time = datetime.utcnow()
+start_time = end_time - timedelta(days=1)
 
 # Fixed time in UTC
-fixed_time = datetime.utcnow().replace(hour=4, minute=30, second=0, microsecond=0)   #10:00 AM in IST
+#fixed_time = datetime.utcnow().replace(hour=4, minute=30, second=0, microsecond=0)   #10:00 AM in IST
 # End time is today at 04:30 UTC and 10:00 AM IN IST
-end_time = fixed_time
+#end_time = fixed_time
 # Start time is yesterday at 04:30 UTC
-start_time = end_time - timedelta(days=1)
+#start_time = end_time - timedelta(days=1)
 start_str = start_time.strftime("%Y-%m-%dT%H:%M:%S")
 end_str = end_time.strftime("%Y-%m-%dT%H:%M:%S")
 
