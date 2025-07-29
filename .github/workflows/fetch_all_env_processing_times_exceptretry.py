@@ -132,8 +132,8 @@ for env, config in environments.items():
     # ------------------------
     max_durations = {}
     for record in duration_records:
-        if record["Status"] == "RETRY":
-            continue  # Skip RETRY records
+        #if record["Status"] == "RETRY":
+           # continue  # Skip RETRY records
 
         name = record["IntegrationFlowName"]
         if name not in max_durations or record["DurationMs"] > max_durations[name]["DurationMs"]:
